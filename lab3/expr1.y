@@ -1,110 +1,97 @@
 %{
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #ifndef YYSTYPE
-#define YYSTYPE	char*
+#define YYSTYPE double
 #endif
-char idStr [50];
-char numStr[50];
+
 int yylex ();
 extern int yyparse();
 FILE* yyin;
-void yyerror(const char* s );
+void yyerror(const char* s);
 %}
 
-%token NUMBER
-%token ID
 %token ADD
 %token SUB
 %token MUL
 %token DIV
+%token NUMBER
+
 %left ADD SUB
 %left MUL DIV
-%right USUB
 
+%right UMINUS
 
 %%
 
 
-lines	:	lines expr '\n' { printf("%s\n", $2); }
-		|	lines '\n'
+lines   :	lines expr ';' { printf("%f\n", $2); }
+		|	lines ';'
 		|
 		;
 
-expr	:	expr ADD expr { $$ = (char*)malloc(strlen($1) + strlen($3) + 1); strcpy($$,$1); strcat($$,$3); strcat($$,"+ "); }
-		|expr SUB expr { $$ = (char*)malloc(strlen($1) + strlen($3) + 1); strcpy($$,$1); strcat($$,$3); strcat($$,"- "); }
-		|expr MUL expr { $$ = (char*)malloc(strlen($1) + strlen($3) + 1); strcpy($$,$1); strcat($$,$3); strcat($$,"* "); }
-		|expr DIV expr { $$ = (char*)malloc(strlen($1) + strlen($3) + 1); strcpy($$,$1); strcat($$,$3); strcat($$,"/ "); }
-		|'(' expr')' { (char*)malloc(strlen($2) + 3); strcpy($$, $2);}
-		|NUMBER { $$ = (char*)malloc(strlen($1) + 1); strcpy($$, $1); strcat($$," ");}
-		|ID { $$ = (char*)malloc(strlen($1) + 1); strcpy($$, $1); strcat($$," ");}
+expr    :   expr ADD expr { $$ = $1 + $3; }
+		|	expr SUB expr { $$ = $1 - $3; }
+		|	expr MUL expr { $$ = $1 * $3; }
+		|	expr DIV expr { $$ = $1 / $3; }
+		|	'(' expr')' { $$ = $2; }
+		|	SUB expr %prec UMINUS { $$ = -$2; }
+		|	NUMBER { $$ = $1; }
 		;
 
 
 %%
 
-
 // programs section
+
 int yylex()
 {
-	// place your token retrieving code here
 	char t;
+	t = getchar();
+	switch (t) {
+		case '+':
+			return ADD;
+		case '-':
+			return SUB;
+		case '*':
+			return MUL;
+		case '/':
+			return DIV;
+		default:
+			ungetc(t , stdin);
+	}
+
 	while (1) {
-		t = getchar ();
-		if (t == ' ' || t== '\t'){}
-		else if (( t >= '0' && t <= '9' )) {
-			int ti = 0;
-			while (( t >= '0' && t <= '9' )) {
-				numStr[ti] = t;
+		t = getchar();
+		if (t == ' ' || t == '\t' || t == '\n'){
+			//do nothing
+		} 
+		else if (t<='9'&&t>='0') {
+			yylval = 0;
+			while (t<='9'&&t>='0') {
+				yylval = yylval * 10 + t - '0';
 				t = getchar();
-				ti++;
+				if (t == ' ' || t == '\t' || t == '\n'){t= getchar();}
 			}
-			numStr[ti] = '\0';
-			yylval = numStr;
 			ungetc(t , stdin);
 			return NUMBER;
-		}
-		else if ((t>='a' && t<='z') || (t>='A' && t<='Z') || (t=='_')) {
-			int ti=0;
-			while ((t>='a' && t<='z') ||(t>='A' && t<='Z') || (t=='_') || (t>='0' && t<='9')) {
-				idStr[ti]=t;
-				ti++;
-				t = getchar();
-			}
-			idStr[ti]='\0';
-			yylval = idStr;
-			ungetc(t, stdin);
-			return ID;
-		}
-		else if (t=='+'){
-			return ADD;
-		}
-		else if (t=='-'){
-			return SUB;
-		}
-		else if (t=='*'){
-			return MUL;
-		}
-		else if (t=='/'){
-			return DIV;
-		}
-		else { 
-			return t; 
+		} else {
+			return t;
 		}
 	}
 }
 
 int main(void)
 {
-	yyin = stdin;
+	yyin = stdin ;
 	do {
 		yyparse();
 	} while (!feof(yyin));
 	return 0;
 }
 
-void yyerror(const char* s) {
-	fprintf (stderr , "Parse error	:	%s\n", s );
+void yyerror(const char* s)
+{
+	fprintf (stderr , "Parse error : %s\n", s );
 	exit (1);
 }
