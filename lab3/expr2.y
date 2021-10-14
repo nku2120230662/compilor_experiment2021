@@ -16,12 +16,12 @@ void yyerror(const char* s );
 %token NUMBER
 %token ID
 %token ADD
-%token MINUS
+%token SUB
 %token MUL
 %token DIV
-%left ADD MINUS
+%left ADD SUB
 %left MUL DIV
-%right UMINUS
+%right USUB
 
 
 %%
@@ -33,10 +33,10 @@ lines	:	lines expr '\n' { printf("%s\n", $2); }
 		;
 
 expr	:	expr ADD expr { $$ = (char*)malloc(strlen($1) + strlen($3) + 1); strcpy($$,$1); strcat($$,$3); strcat($$,"+"); }
-		|	expr MINUS expr { $$ = (char*)malloc(strlen($1) + strlen($3) + 1); strcpy($$,$1); strcat($$,$3); strcat($$,"-"); }
+		|	expr SUB expr { $$ = (char*)malloc(strlen($1) + strlen($3) + 1); strcpy($$,$1); strcat($$,$3); strcat($$,"-"); }
 		|	expr MUL expr { $$ = (char*)malloc(strlen($1) + strlen($3) + 1); strcpy($$,$1); strcat($$,$3); strcat($$,"*"); }
 		|	expr DIV expr { $$ = (char*)malloc(strlen($1) + strlen($3) + 1); strcpy($$,$1); strcat($$,$3); strcat($$,"/"); }
-		|	'(' expr')' { (char*)malloc(strlen($2) + 1); strcpy($$, $2); strcat($$," ");}
+		|	'(' expr')' { (char*)malloc(strlen($2) + 3); strcpy($$, $2); strcat($$," ");}
 		|	NUMBER { $$ = (char*)malloc(strlen($1) + 1); strcpy($$, $1); strcat($$," ");}
 		|	ID { $$ = (char*)malloc(strlen($1) + 1); strcpy($$, $1); strcat($$," ");}
 		;
@@ -82,7 +82,7 @@ int yylex()
 			return ADD;
 		}
 		else if (t=='-'){
-			return MINUS;
+			return SUB;
 		}
 		else if (t=='*'){
 			return MUL;
