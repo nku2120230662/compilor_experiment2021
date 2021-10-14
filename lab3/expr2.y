@@ -27,12 +27,12 @@ void yyerror(const char* s );
 %%
 
 
-lines	:	lines expr '\n' { printf("%s\n", $2); }
-		|	lines '\n'
+lines	:	 lines expr ';' { printf("%s\n", $2); }
+		|lines ';'
 		|
 		;
 
-expr	:	expr ADD expr { $$ = (char*)malloc(strlen($1) + strlen($3) + 1); strcpy($$,$1); strcat($$,$3); strcat($$,"+ "); }
+expr	:	 expr ADD expr { $$ = (char*)malloc(strlen($1) + strlen($3) + 1); strcpy($$,$1); strcat($$,$3); strcat($$,"+ "); }
 		|expr SUB expr { $$ = (char*)malloc(strlen($1) + strlen($3) + 1); strcpy($$,$1); strcat($$,$3); strcat($$,"- "); }
 		|expr MUL expr { $$ = (char*)malloc(strlen($1) + strlen($3) + 1); strcpy($$,$1); strcat($$,$3); strcat($$,"* "); }
 		|expr DIV expr { $$ = (char*)malloc(strlen($1) + strlen($3) + 1); strcpy($$,$1); strcat($$,$3); strcat($$,"/ "); }
@@ -52,31 +52,8 @@ int yylex()
 	char t;
 	while (1) {
 		t = getchar ();
-		if (t == ' ' || t== '\t'){}
-		else if (( t >= '0' && t <= '9' )) {
-			int ti = 0;
-			while (( t >= '0' && t <= '9' )) {
-				numStr[ti] = t;
-				t = getchar();
-				ti++;
-			}
-			numStr[ti] = '\0';
-			yylval = numStr;
-			ungetc(t , stdin);
-			return NUMBER;
-		}
-		else if ((t>='a' && t<='z') || (t>='A' && t<='Z') || (t=='_')) {
-			int ti=0;
-			while ((t>='a' && t<='z') ||(t>='A' && t<='Z') || (t=='_') || (t>='0' && t<='9')) {
-				idStr[ti]=t;
-				ti++;
-				t = getchar();
-			}
-			idStr[ti]='\0';
-			yylval = idStr;
-			ungetc(t, stdin);
-			return ID;
-		}
+		if (t == ' '|| t== '\t'||t== '\n'){}
+		
 		else if (t=='+'){
 			return ADD;
 		}
@@ -89,6 +66,33 @@ int yylex()
 		else if (t=='/'){
 			return DIV;
 		}
+		
+		else if (( t >= '0' && t <= '9' )) {
+			int ti = 0;
+			while (( t >= '0' && t <= '9' )) {
+				numStr[ti] = t;
+				t = getchar();
+				ti++;
+			}
+			numStr[ti] = '\0';
+			yylval = numStr;
+			ungetc(t , stdin);
+			return NUMBER;
+		}
+		
+		else if ((t>='a' && t<='z') || (t>='A' && t<='Z') || (t=='_')) {
+			int ti=0;
+			while ((t>='a' && t<='z') ||(t>='A' && t<='Z') || (t=='_') || (t>='0' && t<='9')) {
+				idStr[ti]=t;
+				ti++;
+				t = getchar();
+			}
+			idStr[ti]='\0';
+			yylval = idStr;
+			ungetc(t, stdin);
+			return ID;
+		}
+		
 		else { 
 			return t; 
 		}
