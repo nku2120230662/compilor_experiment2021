@@ -21,7 +21,7 @@ void yyerror(const char* s );
 %token DIV
 %left ADD SUB
 %left MUL DIV
-%right USUB
+%right UMINUS
 
 
 %%
@@ -37,6 +37,7 @@ expr	:	 expr ADD expr { $$ = (char*)malloc(strlen($1) + strlen($3) + 1); strcpy(
 		|expr MUL expr { $$ = (char*)malloc(strlen($1) + strlen($3) + 1); strcpy($$,$1); strcat($$,$3); strcat($$,"* "); }
 		|expr DIV expr { $$ = (char*)malloc(strlen($1) + strlen($3) + 1); strcpy($$,$1); strcat($$,$3); strcat($$,"/ "); }
 		|'(' expr')' { (char*)malloc(strlen($2) + 3); strcpy($$, $2);}
+		|SUB expr %prec UMINUS { $$ = (char*)malloc(strlen($2) + 2); strcpy($$,"-"); strcat($$,$2); strcat($$," "); }
 		|NUMBER { $$ = (char*)malloc(strlen($1) + 1); strcpy($$, $1); strcat($$," ");}
 		|ID { $$ = (char*)malloc(strlen($1) + 1); strcpy($$, $1); strcat($$," ");}
 		;
@@ -92,10 +93,7 @@ int yylex()
 			ungetc(t, stdin);
 			return ID;
 		}
-		
-		else { 
-			return t; 
-		}
+		else return t;
 	}
 }
 
