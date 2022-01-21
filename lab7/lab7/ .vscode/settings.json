@@ -1,0 +1,21 @@
+{
+    "files.associations": {
+        "type_traits": "cpp",
+        "limits": "cpp",
+        "*.def": "cpp",
+        "*.inc": "cpp",
+        "*.tcc": "cpp",
+        "algorithm": "cpp",
+        "memory": "cpp",
+        "random": "cpp",
+        "fstream": "cpp",
+        "iosfwd": "cpp",
+        "iostream": "cpp",
+        "istream": "cpp",
+        "numeric": "cpp",
+        "ostream": "cpp",
+        "sstream": "cpp",
+        "streambuf": "cpp",
+        "xstring": "cpp"
+    }
+}
